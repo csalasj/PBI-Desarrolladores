@@ -1,0 +1,59 @@
+QUERYS DAX:
+
+Count Actividad = VAR Resultados =
+COUNT(
+    Actividad[UserId]
+)
+RETURN
+IF(ISBLANK(Resultados), 0, Resultados)
+
+Count Capacidad = COUNT(Actividad[Capacidad])
+
+Count Usuarios = COUNT('Licencias'[UserId])
+
+Count Workspace = COUNT(Actividad[WorkSpaceName])
+
+Fecha última actualización = "Información del " & MIN('Rango Fecha'[EventDate])& " al " & MAX('Rango Fecha'[EventDate])
+
+Capacidad = IF(
+    	OR(
+            CONTAINSSTRING('Actividad'[CapacityName],"Empresas CMPC"),
+            CONTAINSSTRING('Actividad'[CapacityName],"Softys")
+            ),
+        "Premium", "Compartida"
+)
+
+Negocio = IF(
+//EMPRESAS CMPC
+    	OR(
+            OR(
+            CONTAINSSTRING('Actividad'[WorkSpaceName],"EMP]"),
+            CONTAINSSTRING('Actividad'[WorkSpaceName],"Empresas CMPC")),
+                CONTAINSSTRING('Actividad'[WorkSpaceName],"-EMP-")),
+        "Empresas CMPC",
+//BIOPACKAGING
+         IF(
+         OR(
+             CONTAINSSTRING('Actividad'[WorkSpaceName],"BIO]"),
+             CONTAINSSTRING('Actividad'[WorkSpaceName],"Biopackaging")),
+            "Biopackaging",
+//CELULOSA
+            IF(
+            OR(
+                OR(
+                    CONTAINSSTRING('Actividad'[WorkSpaceName],"CEL]"),
+                    CONTAINSSTRING('Actividad'[WorkSpaceName],"Celulosa")),
+                    OR(
+                        CONTAINSSTRING('Actividad'[WorkSpaceName], "Celulosa"),
+                        CONTAINSSTRING('Actividad'[WorkSpaceName], "[BR"))),
+            "Celulosa",
+//SOFTYS
+            IF(
+                OR(
+                    CONTAINSSTRING('Actividad'[WorkSpaceName],"Softys"),
+                    CONTAINSSTRING('Actividad'[WorkSpaceName],"BD_SOFTYS")),
+                    "Softys", "")   
+                )
+            )
+)
+
